@@ -36,10 +36,10 @@ a {
   isolation: isolate;
   min-height: 100dvh;
   overflow: hidden;
-  background: #111315;
+  background: #111315 url("/coffee-poster.jpg") center / cover no-repeat;
 }
 
-.film-story__video,
+.film-story__canvas,
 .film-story__scrim {
   position: absolute;
   inset: 0;
@@ -47,10 +47,15 @@ a {
   height: 100%;
 }
 
-.film-story__video {
+.film-story__canvas {
   z-index: -2;
-  object-fit: cover;
-  object-position: 53% center;
+  display: block;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.film-story__canvas.is-ready {
+  opacity: 1;
 }
 
 .film-story__scrim {
@@ -447,10 +452,6 @@ a {
   .hero-subtitle {
     max-width: 19rem;
     margin-top: 1.25rem;
-  }
-
-  .film-story__video {
-    object-position: 58% center;
   }
 
   .film-story__scrim {

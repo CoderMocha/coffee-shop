@@ -25,44 +25,161 @@ const chapters = [
   },
 ];
 
+const FRAME_RATE = 24;
+const FRAME_COUNT = 240;
+const FRAMES_PER_SHEET = 30;
+const SHEET_COUNT = 8;
+const SHEET_COLUMNS = 6;
+const FRAME_WIDTH = 800;
+const FRAME_HEIGHT = 450;
+
+const sheetUrl = (index: number) =>
+  `/film-sheets/sheet-${index.toString().padStart(2, "0")}.jpg`;
+
 export function ScrollStory() {
   const storyRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const currentTimeRef = useRef<HTMLSpanElement>(null);
   const progressRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const story = storyRef.current;
-    const video = videoRef.current;
-    if (!story || !video) return;
+    const canvas = canvasRef.current;
+    if (!story || !canvas) return;
 
-    let ctx: gsap.Context | undefined;
+    const drawingContext = canvas.getContext("2d", { alpha: false });
+    if (!drawingContext) return;
+    drawingContext.imageSmoothingEnabled = true;
+    drawingContext.imageSmoothingQuality = "high";
+
+    let animationContext: gsap.Context | undefined;
     let active = true;
-    let objectUrl: string | undefined;
+    let currentFrame = 0;
+    let lastRenderedFrame = -1;
+    const sheets = new Map<number, HTMLImageElement>();
+    const pendingSheets = new Map<number, Promise<HTMLImageElement>>();
 
-    const warmVideo = async () => {
-      video.defaultMuted = true;
-      video.muted = true;
-      video.playsInline = true;
+    const loadSheet = (index: number) => {
+      const safeIndex = Math.max(0, Math.min(SHEET_COUNT - 1, index));
+      const cached = sheets.get(safeIndex);
+      if (cached) return Promise.resolve(cached);
+
+      const pending = pendingSheets.get(safeIndex);
+      if (pending) return pending;
+
+      const request = new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new window.Image();
+        image.decoding = "async";
+        image.onload = () => {
+          if (!active) return;
+          sheets.set(safeIndex, image);
+          pendingSheets.delete(safeIndex);
+          resolve(image);
+        };
+        image.onerror = () => {
+          pendingSheets.delete(safeIndex);
+          reject(new Error(`Unable to load film sheet ${safeIndex}`));
+        };
+        image.src = sheetUrl(safeIndex);
+      });
+
+      pendingSheets.set(safeIndex, request);
+      return request;
+    };
+
+    const resizeCanvas = () => {
+      const bounds = canvas.getBoundingClientRect();
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const width = Math.max(1, Math.round(bounds.width * pixelRatio));
+      const height = Math.max(1, Math.round(bounds.height * pixelRatio));
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+        lastRenderedFrame = -1;
+      }
+    };
+
+    const evictDistantSheets = (centerIndex: number) => {
+      while (sheets.size > 2) {
+        const candidate = [...sheets.keys()]
+          .filter((index) => index !== centerIndex)
+          .sort((a, b) => Math.abs(b - centerIndex) - Math.abs(a - centerIndex))[0];
+        if (candidate === undefined) break;
+        sheets.get(candidate)?.removeAttribute("src");
+        sheets.delete(candidate);
+      }
+    };
+
+    const drawFrame = async (requestedFrame: number) => {
+      const frame = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(requestedFrame)));
+      currentFrame = frame;
+      if (frame === lastRenderedFrame) return;
+      const previousFrame = lastRenderedFrame;
+
+      const sheetIndex = Math.floor(frame / FRAMES_PER_SHEET);
+      const frameInSheet = frame % FRAMES_PER_SHEET;
 
       try {
-        await video.play();
+        const sheet = await loadSheet(sheetIndex);
+        if (!active || frame !== currentFrame) return;
+
+        resizeCanvas();
+        const sourceX = (frameInSheet % SHEET_COLUMNS) * FRAME_WIDTH;
+        const sourceY = Math.floor(frameInSheet / SHEET_COLUMNS) * FRAME_HEIGHT;
+        const scale = Math.max(canvas.width / FRAME_WIDTH, canvas.height / FRAME_HEIGHT);
+        const targetWidth = FRAME_WIDTH * scale;
+        const targetHeight = FRAME_HEIGHT * scale;
+        const horizontalFocus = window.innerWidth < 768 ? 0.58 : 0.53;
+        const targetX = (canvas.width - targetWidth) * horizontalFocus;
+        const targetY = (canvas.height - targetHeight) * 0.5;
+
+        drawingContext.drawImage(
+          sheet,
+          sourceX,
+          sourceY,
+          FRAME_WIDTH,
+          FRAME_HEIGHT,
+          targetX,
+          targetY,
+          targetWidth,
+          targetHeight,
+        );
+
+        canvas.dataset.frame = frame.toString();
+        canvas.classList.add("is-ready");
+        evictDistantSheets(sheetIndex);
+
+        const direction = previousFrame < 0 || frame >= previousFrame ? 1 : -1;
+        lastRenderedFrame = frame;
+        const adjacentSheet = sheetIndex + direction;
+        if (adjacentSheet >= 0 && adjacentSheet < SHEET_COUNT) {
+          void loadSheet(adjacentSheet).catch(() => undefined);
+        }
       } catch {
-        // Muted autoplay can still be blocked in strict browser modes.
-      } finally {
-        video.pause();
-        video.currentTime = 0;
+        canvas.classList.remove("is-ready");
+      }
+    };
+
+    const prefetchEncodedSheets = async () => {
+      for (let index = 1; index < SHEET_COUNT && active; index += 1) {
+        try {
+          const response = await fetch(sheetUrl(index), { cache: "force-cache" });
+          await response.arrayBuffer();
+        } catch {
+          return;
+        }
       }
     };
 
     const buildTimeline = () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        video.currentTime = Math.min(video.duration * 0.55, 5.5);
+        void drawFrame(Math.round(FRAME_COUNT * 0.55));
         return;
       }
 
-      const playhead = { time: 0 };
-      ctx = gsap.context(() => {
+      const playhead = { frame: 0 };
+      animationContext = gsap.context(() => {
         gsap.set(".story-chapter, .story-finale", { autoAlpha: 0, y: 28 });
 
         const timeline = gsap.timeline({
@@ -72,7 +189,7 @@ export function ScrollStory() {
             start: "top top",
             end: "+=4200",
             pin: true,
-            scrub: 0.65,
+            scrub: 0.25,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
@@ -82,18 +199,20 @@ export function ScrollStory() {
           .to(
             playhead,
             {
-              time: Math.max(0.01, video.duration - 0.08),
+              frame: FRAME_COUNT - 1,
               duration: 10,
               onUpdate: () => {
-                if (!Number.isFinite(playhead.time)) return;
-                video.currentTime = playhead.time;
+                if (!Number.isFinite(playhead.frame)) return;
+                const frame = Math.round(playhead.frame);
+                void drawFrame(frame);
+                const currentTime = frame / FRAME_RATE;
                 if (currentTimeRef.current) {
-                  currentTimeRef.current.textContent = `00:${Math.floor(playhead.time)
+                  currentTimeRef.current.textContent = `00:${Math.floor(currentTime)
                     .toString()
                     .padStart(2, "0")}`;
                 }
                 if (progressRef.current) {
-                  progressRef.current.style.transform = `scaleX(${playhead.time / video.duration})`;
+                  progressRef.current.style.transform = `scaleX(${frame / (FRAME_COUNT - 1)})`;
                 }
               },
             },
@@ -110,57 +229,44 @@ export function ScrollStory() {
       }, story);
     };
 
-    const waitForMetadata = () =>
-      new Promise<void>((resolve, reject) => {
-        if (video.readyState >= 1) {
-          resolve();
-          return;
-        }
-
-        video.addEventListener("loadedmetadata", () => resolve(), { once: true });
-        video.addEventListener("error", () => reject(video.error), { once: true });
-      });
-
     const initialize = async () => {
       try {
-        const response = await fetch("/coffee-film.mp4", { cache: "force-cache" });
-        if (!response.ok) throw new Error(`Video request failed: ${response.status}`);
-
-        objectUrl = URL.createObjectURL(await response.blob());
-        video.src = objectUrl;
-        video.load();
-        await waitForMetadata();
+        await loadSheet(0);
+        await drawFrame(0);
       } catch {
-        video.src = "/coffee-film.mp4";
-        video.load();
-        await waitForMetadata();
+        return;
       }
 
       if (!active) return;
-      await warmVideo();
-      if (active) buildTimeline();
+      void loadSheet(1).catch(() => undefined);
+      void prefetchEncodedSheets();
+      buildTimeline();
     };
 
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
+      void drawFrame(currentFrame);
+    });
+    resizeObserver.observe(story);
     void initialize();
 
     return () => {
       active = false;
-      ctx?.revert();
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      resizeObserver.disconnect();
+      animationContext?.revert();
+      sheets.forEach((image) => image.removeAttribute("src"));
+      sheets.clear();
+      pendingSheets.clear();
     };
   }, []);
 
   return (
     <main>
       <section ref={storyRef} className="film-story" aria-label="MORROW coffee story">
-        <video
-          ref={videoRef}
-          className="film-story__video"
-          poster="/coffee-poster.jpg"
-          muted
-          autoPlay
-          playsInline
-          preload="auto"
+        <canvas
+          ref={canvasRef}
+          className="film-story__canvas"
+          role="img"
           aria-label="Ground coffee falling into a clear glass"
         />
         <div className="film-story__scrim" />
