@@ -38,6 +38,7 @@ export function ScrollStory() {
 
     let ctx: gsap.Context | undefined;
     let active = true;
+    let objectUrl: string | undefined;
 
     const warmVideo = async () => {
       video.defaultMuted = true;
@@ -109,18 +110,43 @@ export function ScrollStory() {
       }, story);
     };
 
+    const waitForMetadata = () =>
+      new Promise<void>((resolve, reject) => {
+        if (video.readyState >= 1) {
+          resolve();
+          return;
+        }
+
+        video.addEventListener("loadedmetadata", () => resolve(), { once: true });
+        video.addEventListener("error", () => reject(video.error), { once: true });
+      });
+
     const initialize = async () => {
+      try {
+        const response = await fetch("/coffee-film.mp4", { cache: "force-cache" });
+        if (!response.ok) throw new Error(`Video request failed: ${response.status}`);
+
+        objectUrl = URL.createObjectURL(await response.blob());
+        video.src = objectUrl;
+        video.load();
+        await waitForMetadata();
+      } catch {
+        video.src = "/coffee-film.mp4";
+        video.load();
+        await waitForMetadata();
+      }
+
+      if (!active) return;
       await warmVideo();
       if (active) buildTimeline();
     };
 
-    if (video.readyState >= 1) void initialize();
-    else video.addEventListener("loadedmetadata", initialize, { once: true });
+    void initialize();
 
     return () => {
       active = false;
-      video.removeEventListener("loadedmetadata", initialize);
       ctx?.revert();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, []);
 
@@ -130,7 +156,6 @@ export function ScrollStory() {
         <video
           ref={videoRef}
           className="film-story__video"
-          src="/coffee-film.mp4"
           poster="/coffee-poster.jpg"
           muted
           autoPlay
