@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geist = Geist({
@@ -7,9 +7,14 @@ const geist = Geist({
   variable: "--font-geist",
 });
 
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+});
+
 export const metadata: Metadata = {
-  title: "MORROW Coffee | Flavor in Motion",
-  description: "MORROW specialty coffee. Scroll through the ten-second making of a cup.",
+  title: "MORROW Coffee | Before the First Sip",
+  description: "A ten-second study of grind, water and the moment flavor takes shape.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
@@ -23,7 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} antialiased`}>{children}</body>
+      <head>
+        <link rel="preload" href="/coffee-poster.jpg" as="image" fetchPriority="high" />
+        <link rel="preload" href="/film-sheets/sheet-00.jpg" as="image" />
+      </head>
+      <body className={`${geist.variable} ${geistMono.variable} antialiased`}>{children}</body>
     </html>
   );
 }

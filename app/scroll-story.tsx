@@ -9,18 +9,18 @@ gsap.registerPlugin(ScrollTrigger);
 const chapters = [
   {
     className: "story-chapter story-chapter--right",
-    title: "Every grind has a landing.",
-    body: "Grind size shapes surface area and how water carries flavor out of the bean.",
+    title: ["Grind sets", "the pace."],
+    body: "Fine particles release sweetness quickly. Coarser ones leave more room for clarity.",
   },
   {
     className: "story-chapter story-chapter--left",
-    title: "Aroma arrives first.",
-    body: "Fruit, nuts and caramel are the cup's first introduction.",
+    title: ["Water carries", "the story."],
+    body: "Aroma lifts first. Fruit, caramel and cacao follow in clean layers.",
   },
   {
     className: "story-chapter story-chapter--right story-chapter--low",
-    title: "Clarity over weight.",
-    body: "We roast for clean layers, so sweetness, acidity and finish each have room.",
+    title: ["Clarity", "stays."],
+    body: "A precise roast lets each note arrive distinct, then linger.",
   },
 ];
 
@@ -55,6 +55,7 @@ export function ScrollStory() {
     let active = true;
     let currentFrame = 0;
     let lastRenderedFrame = -1;
+    let prefetchTimer: ReturnType<typeof window.setTimeout> | undefined;
     const sheets = new Map<number, HTMLImageElement>();
     const pendingSheets = new Map<number, Promise<HTMLImageElement>>();
 
@@ -179,7 +180,33 @@ export function ScrollStory() {
 
       const playhead = { frame: 0 };
       animationContext = gsap.context(() => {
-        gsap.set(".story-chapter, .story-finale", { autoAlpha: 0, y: 28 });
+        const chapterElements = gsap.utils.toArray<HTMLElement>(".story-chapter");
+        const finale = story.querySelector<HTMLElement>(".story-finale");
+
+        gsap.fromTo(
+          ".site-nav",
+          { y: -16 },
+          { y: 0, duration: 0.8, ease: "power3.out" },
+        );
+        gsap.fromTo(
+          ".hero-kicker, .hero-line, .hero-subtitle",
+          { y: 24 },
+          {
+            y: 0,
+            duration: 0.9,
+            stagger: 0.09,
+            ease: "power3.out",
+          },
+        );
+
+        chapterElements.forEach((chapter) => {
+          gsap.set(chapter, { autoAlpha: 0, y: 0 });
+          gsap.set(chapter.querySelectorAll(".chapter-line"), { yPercent: 110 });
+          const body = chapter.querySelector(".story-chapter__body");
+          if (body) gsap.set(body, { autoAlpha: 0, y: 18 });
+        });
+        gsap.set(finale, { autoAlpha: 0, y: 0 });
+        gsap.set(".finale-line", { yPercent: 110 });
 
         const timeline = gsap.timeline({
           defaults: { ease: "none" },
@@ -188,7 +215,7 @@ export function ScrollStory() {
             start: "top top",
             end: "+=4200",
             pin: true,
-            scrub: 0.25,
+            scrub: 0.22,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
@@ -217,14 +244,40 @@ export function ScrollStory() {
             },
             0,
           )
-          .to(".hero-copy", { autoAlpha: 0, y: -32, duration: 0.7 }, 1.2)
-          .to(".story-chapter:nth-of-type(1)", { autoAlpha: 1, y: 0, duration: 0.55 }, 2.15)
-          .to(".story-chapter:nth-of-type(1)", { autoAlpha: 0, y: -24, duration: 0.55 }, 3.5)
-          .to(".story-chapter:nth-of-type(2)", { autoAlpha: 1, y: 0, duration: 0.55 }, 4.25)
-          .to(".story-chapter:nth-of-type(2)", { autoAlpha: 0, y: -24, duration: 0.55 }, 5.65)
-          .to(".story-chapter:nth-of-type(3)", { autoAlpha: 1, y: 0, duration: 0.55 }, 6.35)
-          .to(".story-chapter:nth-of-type(3)", { autoAlpha: 0, y: -24, duration: 0.55 }, 7.8)
-          .to(".story-finale", { autoAlpha: 1, y: 0, duration: 0.65 }, 8.45);
+          .to(".hero-copy", { autoAlpha: 0, y: -40, scale: 0.985, duration: 0.72 }, 1.15);
+
+        [2.05, 4.15, 6.25].forEach((start, index) => {
+          const chapter = chapterElements[index];
+          if (!chapter) return;
+          const body = chapter.querySelector(".story-chapter__body");
+
+          timeline
+            .set(chapter, { autoAlpha: 1 }, start)
+            .to(
+              chapter.querySelectorAll(".chapter-line"),
+              { yPercent: 0, duration: 0.62, stagger: 0.08, ease: "power3.out" },
+              start,
+            )
+            .to(chapter, { autoAlpha: 0, y: -32, duration: 0.5, ease: "power2.in" }, start + 1.38);
+
+          if (body) {
+            timeline.to(
+              body,
+              { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
+              start + 0.14,
+            );
+          }
+        });
+
+        if (finale) {
+          timeline
+            .set(finale, { autoAlpha: 1 }, 8.35)
+            .to(
+              finale.querySelectorAll(".finale-line"),
+              { yPercent: 0, duration: 0.7, stagger: 0.09, ease: "power3.out" },
+              8.35,
+            );
+        }
       }, story);
     };
 
@@ -238,7 +291,7 @@ export function ScrollStory() {
 
       if (!active) return;
       void loadSheet(1).catch(() => undefined);
-      void prefetchEncodedSheets();
+      prefetchTimer = window.setTimeout(() => void prefetchEncodedSheets(), 700);
       buildTimeline();
     };
 
@@ -251,6 +304,7 @@ export function ScrollStory() {
 
     return () => {
       active = false;
+      if (prefetchTimer !== undefined) window.clearTimeout(prefetchTimer);
       resizeObserver.disconnect();
       animationContext?.revert();
       sheets.forEach((image) => image.removeAttribute("src"));
@@ -269,6 +323,7 @@ export function ScrollStory() {
           aria-label="Ground coffee falling into a clear glass"
         />
         <div className="film-story__scrim" />
+        <div className="film-story__vignette" />
 
         <header className="site-nav">
           <a className="wordmark" href="#top" aria-label="MORROW home">
@@ -278,23 +333,38 @@ export function ScrollStory() {
         </header>
 
         <div className="hero-copy" id="top">
-          <p className="hero-kicker">A COFFEE FILM</p>
-          <h1>Ten seconds. One cup.</h1>
-          <p className="hero-subtitle">Scroll to guide every grind, fall and aromatic shift beneath your fingertips.</p>
+          <p className="hero-kicker">MORROW COFFEE</p>
+          <h1 aria-label="Before the first sip.">
+            <span className="hero-line">Before</span>
+            <span className="hero-line hero-line--offset">the first sip.</span>
+          </h1>
+          <p className="hero-subtitle">A ten-second study of grind, water and the moment flavor takes shape.</p>
         </div>
 
         <div className="story-chapters">
           {chapters.map((chapter) => (
-            <article className={chapter.className} key={chapter.title}>
-              <h2>{chapter.title}</h2>
-              <p>{chapter.body}</p>
+            <article className={chapter.className} key={chapter.title.join(" ")}>
+              <h2 aria-label={chapter.title.join(" ")}>
+                {chapter.title.map((line) => (
+                  <span className="chapter-line-mask" key={line}>
+                    <span className="chapter-line">{line}</span>
+                  </span>
+                ))}
+              </h2>
+              <p className="story-chapter__body">{chapter.body}</p>
             </article>
           ))}
         </div>
 
         <div className="story-finale">
-          <p>MORROW</p>
-          <h2>Flavor, in motion.</h2>
+          <h2 aria-label="Flavor, made visible.">
+            <span className="chapter-line-mask">
+              <span className="finale-line">Flavor,</span>
+            </span>
+            <span className="chapter-line-mask">
+              <span className="finale-line">made visible.</span>
+            </span>
+          </h2>
         </div>
 
         <div className="film-counter" aria-hidden="true">
@@ -307,9 +377,16 @@ export function ScrollStory() {
       </section>
 
       <footer className="site-footer">
-        <p className="wordmark">MORROW</p>
-        <p>Every cup, with a clear point of origin.</p>
-        <a href="mailto:hello@morrow.coffee">hello@morrow.coffee</a>
+        <div className="site-footer__heading">
+          <p>Roasted for clarity. Remembered for flavor.</p>
+          <a className="site-footer__action" href="mailto:hello@morrow.coffee">Choose coffee</a>
+        </div>
+        <p className="site-footer__wordmark" aria-label="MORROW">MORROW</p>
+        <div className="site-footer__meta">
+          <p>Specialty coffee, seen clearly.</p>
+          <a href="mailto:hello@morrow.coffee">hello@morrow.coffee</a>
+          <p>© 2026 MORROW</p>
+        </div>
       </footer>
     </main>
   );
