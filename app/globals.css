@@ -126,10 +126,19 @@ a {
 }
 
 .wordmark {
+  display: inline-flex;
   width: max-content;
+  align-items: center;
+  gap: 0.62rem;
   font-size: 0.98rem;
   font-weight: 800;
   letter-spacing: 0.035em;
+}
+
+.wordmark__mark {
+  width: 1.65rem;
+  height: 1.65rem;
+  object-fit: contain;
 }
 
 .nav-action,
@@ -422,6 +431,15 @@ a {
     min-height: 38px;
     padding: 0.58rem 0.9rem;
     font-size: 0.78rem;
+  }
+
+  .wordmark {
+    gap: 0.5rem;
+  }
+
+  .wordmark__mark {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .hero-copy {

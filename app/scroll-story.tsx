@@ -413,7 +413,16 @@ export function ScrollStory() {
 
         <header className="site-nav">
           <a className="wordmark" href="#top" aria-label="MORROW home">
-            MORROW
+            <Image
+              className="wordmark__mark"
+              src="/brand/morrow-freeze-dried-mark.webp"
+              alt=""
+              width={28}
+              height={28}
+              unoptimized
+              draggable={false}
+            />
+            <span>MORROW</span>
           </a>
           <a className="nav-action" href="mailto:hello@morrow.coffee">Choose coffee</a>
         </header>
