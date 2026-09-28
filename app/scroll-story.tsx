@@ -56,7 +56,7 @@ export function ScrollStory() {
     let active = true;
     let currentFrame = 0;
     let lastRenderedFrame = -1;
-    let prefetchTimer: ReturnType<typeof window.setTimeout> | undefined;
+    let prefetchTimer: number | undefined;
     const sheets = new Map<number, HTMLImageElement>();
     const pendingSheets = new Map<number, Promise<HTMLImageElement>>();
 
