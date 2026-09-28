@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -275,12 +274,7 @@ export function ScrollStory() {
           <a className="wordmark" href="#top" aria-label="MORROW home">
             MORROW
           </a>
-          <nav className="site-nav__links" aria-label="Primary navigation">
-            <a href="#origin">Origin</a>
-            <a href="#roast">Roast</a>
-            <a href="#taste">Notes</a>
-          </nav>
-          <a className="nav-action" href="#taste">Choose coffee</a>
+          <a className="nav-action" href="mailto:hello@morrow.coffee">Choose coffee</a>
         </header>
 
         <div className="hero-copy" id="top">
@@ -309,58 +303,6 @@ export function ScrollStory() {
             <span ref={progressRef} className="film-counter__progress" />
           </span>
           <span>00:10</span>
-        </div>
-      </section>
-
-      <section className="origin-section" id="origin">
-        <div className="origin-copy">
-          <p className="section-index">FROM ORIGIN</p>
-          <h2>Flavor begins before tasting notes.</h2>
-          <p>
-            We start with origin, process and roast curve. The complexity stays behind the scenes. What reaches your cup is clarity.
-          </p>
-        </div>
-        <figure className="origin-figure">
-          <Image
-            src="/coffee-detail-1.jpg"
-            alt="Ground coffee forming a fine stream above a glass"
-            fill
-            sizes="(max-width: 767px) 100vw, 56vw"
-          />
-        </figure>
-      </section>
-
-      <section className="roast-section" id="roast">
-        <p className="roast-statement">Light roast. Full expression.</p>
-        <div className="roast-notes">
-          <div>
-            <span>Fruit</span>
-            <p>The bright outline of origin stays intact.</p>
-          </div>
-          <div>
-            <span>Sweetness</span>
-            <p>Gentle caramelization catches the acidity.</p>
-          </div>
-          <div>
-            <span>Finish</span>
-            <p>Clean and lingering, without the burnt edge.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="taste-section" id="taste">
-        <div className="taste-image">
-          <Image
-            src="/coffee-detail-2.jpg"
-            alt="Ground coffee falling into a glass in a fluid arc"
-            fill
-            sizes="(max-width: 767px) 100vw, 50vw"
-          />
-        </div>
-        <div className="taste-copy">
-          <h2>Taste with more clarity.</h2>
-          <p>Choose the flavors you enjoy. We will match them with a coffee worth slowing down for.</p>
-          <a href="mailto:hello@morrow.coffee">Choose coffee</a>
         </div>
       </section>
 
