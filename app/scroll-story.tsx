@@ -179,6 +179,19 @@ export function ScrollStory() {
         return;
       }
 
+      const hasFinePointer = window.matchMedia("(pointer: fine)").matches;
+      const scrollDistance = () => {
+        const viewportMultiplier = hasFinePointer ? 7 : 5.4;
+        const minimumDistance = hasFinePointer ? 5600 : 4400;
+        const maximumDistance = hasFinePointer ? 7200 : 5600;
+
+        return Math.round(
+          Math.min(
+            Math.max(window.innerHeight * viewportMultiplier, minimumDistance),
+            maximumDistance,
+          ),
+        );
+      };
       const playhead = { frame: 0 };
       animationContext = gsap.context(() => {
         const chapterElements = gsap.utils.toArray<HTMLElement>(".story-chapter");
@@ -220,9 +233,9 @@ export function ScrollStory() {
           scrollTrigger: {
             trigger: story,
             start: "top top",
-            end: "+=4200",
+            end: () => `+=${scrollDistance()}`,
             pin: true,
-            scrub: 0.22,
+            scrub: hasFinePointer ? 0.75 : 0.38,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
