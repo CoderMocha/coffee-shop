@@ -10,18 +10,18 @@ gsap.registerPlugin(ScrollTrigger);
 const chapters = [
   {
     className: "story-chapter story-chapter--right",
-    title: "每一粒，都有落点。",
-    body: "研磨决定接触面积，也决定水如何把风味带出来。",
+    title: "Every grind has a landing.",
+    body: "Grind size shapes surface area and how water carries flavor out of the bean.",
   },
   {
     className: "story-chapter story-chapter--left",
-    title: "让香气先抵达。",
-    body: "闻到的果香、坚果与焦糖，是一杯咖啡最早的自我介绍。",
+    title: "Aroma arrives first.",
+    body: "Fruit, nuts and caramel are the cup's first introduction.",
   },
   {
     className: "story-chapter story-chapter--right story-chapter--low",
-    title: "清晰，胜过浓重。",
-    body: "我们追求干净的层次，让甜感、酸质与余韵各自发生。",
+    title: "Clarity over weight.",
+    body: "We roast for clean layers, so sweetness, acidity and finish each have room.",
   },
 ];
 
@@ -37,6 +37,22 @@ export function ScrollStory() {
     if (!story || !video) return;
 
     let ctx: gsap.Context | undefined;
+    let active = true;
+
+    const warmVideo = async () => {
+      video.defaultMuted = true;
+      video.muted = true;
+      video.playsInline = true;
+
+      try {
+        await video.play();
+      } catch {
+        // Muted autoplay can still be blocked in strict browser modes.
+      } finally {
+        video.pause();
+        video.currentTime = 0;
+      }
+    };
 
     const buildTimeline = () => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -93,46 +109,53 @@ export function ScrollStory() {
       }, story);
     };
 
-    if (video.readyState >= 1) buildTimeline();
-    else video.addEventListener("loadedmetadata", buildTimeline, { once: true });
+    const initialize = async () => {
+      await warmVideo();
+      if (active) buildTimeline();
+    };
+
+    if (video.readyState >= 1) void initialize();
+    else video.addEventListener("loadedmetadata", initialize, { once: true });
 
     return () => {
-      video.removeEventListener("loadedmetadata", buildTimeline);
+      active = false;
+      video.removeEventListener("loadedmetadata", initialize);
       ctx?.revert();
     };
   }, []);
 
   return (
     <main>
-      <section ref={storyRef} className="film-story" aria-label="MORROW 咖啡品牌故事">
+      <section ref={storyRef} className="film-story" aria-label="MORROW coffee story">
         <video
           ref={videoRef}
           className="film-story__video"
           src="/coffee-film.mp4"
           poster="/coffee-poster.jpg"
           muted
+          autoPlay
           playsInline
           preload="auto"
-          aria-label="咖啡粉缓缓落入透明玻璃杯"
+          aria-label="Ground coffee falling into a clear glass"
         />
         <div className="film-story__scrim" />
 
         <header className="site-nav">
-          <a className="wordmark" href="#top" aria-label="MORROW 首页">
+          <a className="wordmark" href="#top" aria-label="MORROW home">
             MORROW
           </a>
-          <nav className="site-nav__links" aria-label="主导航">
-            <a href="#origin">产地</a>
-            <a href="#roast">烘焙</a>
-            <a href="#taste">风味</a>
+          <nav className="site-nav__links" aria-label="Primary navigation">
+            <a href="#origin">Origin</a>
+            <a href="#roast">Roast</a>
+            <a href="#taste">Notes</a>
           </nav>
-          <a className="nav-action" href="#taste">选豆</a>
+          <a className="nav-action" href="#taste">Choose coffee</a>
         </header>
 
         <div className="hero-copy" id="top">
           <p className="hero-kicker">A COFFEE FILM</p>
-          <h1>把十秒，磨成一杯咖啡。</h1>
-          <p className="hero-subtitle">滚动，让研磨、落下与香气发生在你的指尖。</p>
+          <h1>Ten seconds. One cup.</h1>
+          <p className="hero-subtitle">Scroll to guide every grind, fall and aromatic shift beneath your fingertips.</p>
         </div>
 
         <div className="story-chapters">
@@ -146,7 +169,7 @@ export function ScrollStory() {
 
         <div className="story-finale">
           <p>MORROW</p>
-          <h2>风味，正在发生。</h2>
+          <h2>Flavor, in motion.</h2>
         </div>
 
         <div className="film-counter" aria-hidden="true">
@@ -161,15 +184,15 @@ export function ScrollStory() {
       <section className="origin-section" id="origin">
         <div className="origin-copy">
           <p className="section-index">FROM ORIGIN</p>
-          <h2>风味，从不靠形容词开始。</h2>
+          <h2>Flavor begins before tasting notes.</h2>
           <p>
-            我们从产地信息、处理方式与烘焙曲线开始理解每支豆子，再把复杂留在幕后，把清晰留在杯中。
+            We start with origin, process and roast curve. The complexity stays behind the scenes. What reaches your cup is clarity.
           </p>
         </div>
         <figure className="origin-figure">
           <Image
             src="/coffee-detail-1.jpg"
-            alt="咖啡粉在玻璃杯上方形成细腻的流动"
+            alt="Ground coffee forming a fine stream above a glass"
             fill
             sizes="(max-width: 767px) 100vw, 56vw"
           />
@@ -177,19 +200,19 @@ export function ScrollStory() {
       </section>
 
       <section className="roast-section" id="roast">
-        <p className="roast-statement">轻烘，不轻描淡写。</p>
+        <p className="roast-statement">Light roast. Full expression.</p>
         <div className="roast-notes">
           <div>
-            <span>果香</span>
-            <p>保留产地本身的明亮轮廓。</p>
+            <span>Fruit</span>
+            <p>The bright outline of origin stays intact.</p>
           </div>
           <div>
-            <span>甜感</span>
-            <p>让焦糖化的温柔接住酸质。</p>
+            <span>Sweetness</span>
+            <p>Gentle caramelization catches the acidity.</p>
           </div>
           <div>
-            <span>余韵</span>
-            <p>干净、悠长，不留下焦苦。</p>
+            <span>Finish</span>
+            <p>Clean and lingering, without the burnt edge.</p>
           </div>
         </div>
       </section>
@@ -198,21 +221,21 @@ export function ScrollStory() {
         <div className="taste-image">
           <Image
             src="/coffee-detail-2.jpg"
-            alt="落入杯中的咖啡粉呈现出丰富颗粒与流动质感"
+            alt="Ground coffee falling into a glass in a fluid arc"
             fill
             sizes="(max-width: 767px) 100vw, 50vw"
           />
         </div>
         <div className="taste-copy">
-          <h2>今天，喝得更清楚。</h2>
-          <p>选择你喜欢的风味方向，我们会把合适的咖啡寄到你手中。</p>
-          <a href="mailto:hello@morrow.coffee">选豆</a>
+          <h2>Taste with more clarity.</h2>
+          <p>Choose the flavors you enjoy. We will match them with a coffee worth slowing down for.</p>
+          <a href="mailto:hello@morrow.coffee">Choose coffee</a>
         </div>
       </section>
 
       <footer className="site-footer">
         <p className="wordmark">MORROW</p>
-        <p>让每一杯，都有清晰来处。</p>
+        <p>Every cup, with a clear point of origin.</p>
         <a href="mailto:hello@morrow.coffee">hello@morrow.coffee</a>
       </footer>
     </main>

@@ -8,8 +8,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "MORROW Coffee | 把时间磨成风味",
-  description: "MORROW 精品咖啡品牌。滚动进入一杯咖啡的十秒诞生过程。",
+  title: "MORROW Coffee | Flavor in Motion",
+  description: "MORROW specialty coffee. Scroll through the ten-second making of a cup.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="en">
       <body className={`${geist.variable} antialiased`}>{children}</body>
     </html>
   );
