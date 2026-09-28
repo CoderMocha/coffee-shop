@@ -53,7 +53,7 @@ a {
 }
 
 .film-story__canvas {
-  z-index: -3;
+  z-index: 0;
   display: block;
   opacity: 0;
   transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -64,22 +64,53 @@ a {
 }
 
 .film-story__scrim {
-  z-index: -2;
+  z-index: 1;
   background:
     linear-gradient(90deg, rgb(5 7 8 / 90%) 0%, rgb(5 7 8 / 54%) 37%, transparent 69%),
     linear-gradient(180deg, rgb(5 7 8 / 54%) 0%, transparent 30%, rgb(5 7 8 / 58%) 100%);
 }
 
 .film-story__vignette {
-  z-index: -1;
+  z-index: 4;
   background:
     radial-gradient(circle at 56% 48%, transparent 32%, rgb(4 6 7 / 34%) 78%, rgb(4 6 7 / 62%) 100%),
     linear-gradient(180deg, rgb(4 6 7 / 24%), transparent 16%, transparent 80%, rgb(4 6 7 / 38%));
 }
 
+.parallax-layer {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.parallax-layer img {
+  object-fit: cover;
+  object-position: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.parallax-layer--haze {
+  z-index: 2;
+  opacity: 0.14;
+  mix-blend-mode: screen;
+}
+
+.parallax-layer--caustics {
+  z-index: 3;
+  opacity: 0.2;
+  mix-blend-mode: screen;
+}
+
+.parallax-layer--particles {
+  z-index: 7;
+  opacity: 0.54;
+}
+
 .site-nav {
   position: absolute;
-  z-index: 3;
+  z-index: 9;
   top: 0;
   right: 0;
   left: 0;
@@ -137,6 +168,8 @@ a {
 }
 
 .hero-copy {
+  position: relative;
+  z-index: 6;
   display: flex;
   min-height: 100dvh;
   max-width: 75rem;
@@ -186,6 +219,7 @@ a {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 6;
 }
 
 .story-chapter {
@@ -262,6 +296,7 @@ a {
 
 .film-counter {
   position: absolute;
+  z-index: 8;
   right: clamp(1.25rem, 3.8vw, 4.5rem);
   bottom: 2rem;
   display: flex;
@@ -416,6 +451,27 @@ a {
       linear-gradient(90deg, rgb(5 7 8 / 36%), transparent 72%);
   }
 
+  .parallax-layer {
+    inset: -16%;
+  }
+
+  .parallax-layer img {
+    object-fit: contain !important;
+    transform: rotate(90deg) scale(1.42);
+  }
+
+  .parallax-layer--haze {
+    opacity: 0.06;
+  }
+
+  .parallax-layer--caustics {
+    opacity: 0.08;
+  }
+
+  .parallax-layer--particles {
+    opacity: 0.2;
+  }
+
   .story-chapter,
   .story-chapter--right,
   .story-chapter--left,
@@ -506,5 +562,9 @@ a {
   .story-finale,
   .film-counter {
     display: none;
+  }
+
+  .parallax-layer {
+    transform: none !important;
   }
 }

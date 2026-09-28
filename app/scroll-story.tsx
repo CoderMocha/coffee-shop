@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -182,6 +183,9 @@ export function ScrollStory() {
       animationContext = gsap.context(() => {
         const chapterElements = gsap.utils.toArray<HTMLElement>(".story-chapter");
         const finale = story.querySelector<HTMLElement>(".story-finale");
+        const hazeLayer = story.querySelector<HTMLElement>(".parallax-layer--haze");
+        const causticsLayer = story.querySelector<HTMLElement>(".parallax-layer--caustics");
+        const particlesLayer = story.querySelector<HTMLElement>(".parallax-layer--particles");
 
         gsap.fromTo(
           ".site-nav",
@@ -207,6 +211,9 @@ export function ScrollStory() {
         });
         gsap.set(finale, { autoAlpha: 0, y: 0 });
         gsap.set(".finale-line", { yPercent: 110 });
+        gsap.set(hazeLayer, { xPercent: -2, yPercent: 2, scale: 1.04, rotation: -0.4 });
+        gsap.set(causticsLayer, { xPercent: 2, yPercent: -1, scale: 1.05, rotation: 0.35 });
+        gsap.set(particlesLayer, { xPercent: 1, yPercent: 3, scale: 1.04, rotation: 0.4 });
 
         const timeline = gsap.timeline({
           defaults: { ease: "none" },
@@ -241,6 +248,42 @@ export function ScrollStory() {
                   progressRef.current.style.transform = `scaleX(${frame / (FRAME_COUNT - 1)})`;
                 }
               },
+            },
+            0,
+          )
+          .to(
+            hazeLayer,
+            {
+              xPercent: 3,
+              yPercent: -4,
+              scale: 1.1,
+              rotation: 0.65,
+              force3D: true,
+              duration: 10,
+            },
+            0,
+          )
+          .to(
+            causticsLayer,
+            {
+              xPercent: -4,
+              yPercent: 4,
+              scale: 1.13,
+              rotation: -1.15,
+              force3D: true,
+              duration: 10,
+            },
+            0,
+          )
+          .to(
+            particlesLayer,
+            {
+              xPercent: -6,
+              yPercent: -11,
+              scale: 1.18,
+              rotation: -2.2,
+              force3D: true,
+              duration: 10,
             },
             0,
           )
@@ -323,7 +366,37 @@ export function ScrollStory() {
           aria-label="Ground coffee falling into a clear glass"
         />
         <div className="film-story__scrim" />
+        <div className="parallax-layer parallax-layer--haze" aria-hidden="true">
+          <Image
+            src="/parallax/steam-haze.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            unoptimized
+            draggable={false}
+          />
+        </div>
+        <div className="parallax-layer parallax-layer--caustics" aria-hidden="true">
+          <Image
+            src="/parallax/glass-caustics.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            unoptimized
+            draggable={false}
+          />
+        </div>
         <div className="film-story__vignette" />
+        <div className="parallax-layer parallax-layer--particles" aria-hidden="true">
+          <Image
+            src="/parallax/coffee-particles.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            unoptimized
+            draggable={false}
+          />
+        </div>
 
         <header className="site-nav">
           <a className="wordmark" href="#top" aria-label="MORROW home">
