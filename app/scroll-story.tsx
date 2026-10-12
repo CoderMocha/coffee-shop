@@ -10,18 +10,18 @@ gsap.registerPlugin(ScrollTrigger);
 const chapters = [
   {
     className: "story-chapter story-chapter--right",
-    title: ["Grind sets", "the pace."],
-    body: "Fine particles release sweetness quickly. Coarser ones leave more room for clarity.",
+    title: ["Grind shapes", "the cup."],
+    body: "Fine grounds bring sweetness forward. A coarser grind leaves the cup lighter and clearer.",
   },
   {
     className: "story-chapter story-chapter--left",
-    title: ["Water carries", "the story."],
-    body: "Aroma lifts first. Fruit, caramel and cacao follow in clean layers.",
+    title: ["Water draws", "it out."],
+    body: "Water lifts the aroma first. Fruit, caramel and cacao follow, one layer at a time.",
   },
   {
     className: "story-chapter story-chapter--right story-chapter--low",
-    title: ["Clarity", "stays."],
-    body: "A precise roast lets each note arrive distinct, then linger.",
+    title: ["Clarity", "carries through."],
+    body: "A precise roast keeps each note clean and distinct through the last sip.",
   },
 ];
 
@@ -371,7 +371,7 @@ export function ScrollStory() {
 
   return (
     <main>
-      <section ref={storyRef} className="film-story" aria-label="MORROW coffee story">
+      <section ref={storyRef} className="film-story" aria-label="Mocha Coffee story">
         <canvas
           ref={canvasRef}
           className="film-story__canvas"
@@ -412,7 +412,7 @@ export function ScrollStory() {
         </div>
 
         <header className="site-nav">
-          <a className="wordmark" href="#top" aria-label="MORROW home">
+          <a className="wordmark" href="#top" aria-label="Mocha Coffee home">
             <Image
               className="wordmark__mark"
               src="/brand/morrow-freeze-dried-mark.webp"
@@ -422,18 +422,18 @@ export function ScrollStory() {
               unoptimized
               draggable={false}
             />
-            <span>MORROW</span>
+            <span>Mocha Coffee</span>
           </a>
-          <a className="nav-action" href="mailto:hello@morrow.coffee">Choose coffee</a>
+          <a className="nav-action" href="mailto:hello@mocha.coffee">Talk coffee</a>
         </header>
 
         <div className="hero-copy" id="top">
-          <p className="hero-kicker">MORROW COFFEE</p>
+          <p className="hero-kicker">MOCHA COFFEE</p>
           <h1 aria-label="Before the first sip.">
             <span className="hero-line">Before</span>
             <span className="hero-line hero-line--offset">the first sip.</span>
           </h1>
-          <p className="hero-subtitle">A ten-second study of grind, water and the moment flavor takes shape.</p>
+          <p className="hero-subtitle">Ten seconds where grind, water and time become coffee.</p>
         </div>
 
         <div className="story-chapters">
@@ -452,12 +452,12 @@ export function ScrollStory() {
         </div>
 
         <div className="story-finale">
-          <h2 aria-label="Flavor, made visible.">
+          <h2 aria-label="Flavor comes into focus.">
             <span className="chapter-line-mask">
-              <span className="finale-line">Flavor,</span>
+              <span className="finale-line">Flavor comes</span>
             </span>
             <span className="chapter-line-mask">
-              <span className="finale-line">made visible.</span>
+              <span className="finale-line">into focus.</span>
             </span>
           </h2>
         </div>
@@ -473,14 +473,17 @@ export function ScrollStory() {
 
       <footer className="site-footer">
         <div className="site-footer__heading">
-          <p>Roasted for clarity. Remembered for flavor.</p>
-          <a className="site-footer__action" href="mailto:hello@morrow.coffee">Choose coffee</a>
+          <p>Coffee this clear stays with you.</p>
+          <a className="site-footer__action" href="mailto:hello@mocha.coffee">Talk coffee</a>
         </div>
-        <p className="site-footer__wordmark" aria-label="MORROW">MORROW</p>
+        <p className="site-footer__wordmark" aria-label="Mocha Coffee">
+          <span>Mocha</span>
+          <span>Coffee</span>
+        </p>
         <div className="site-footer__meta">
-          <p>Specialty coffee, seen clearly.</p>
-          <a href="mailto:hello@morrow.coffee">hello@morrow.coffee</a>
-          <p>© 2026 MORROW</p>
+          <p>Specialty coffee, roasted for clarity.</p>
+          <a href="mailto:hello@mocha.coffee">hello@mocha.coffee</a>
+          <p>© 2026 Mocha Coffee</p>
         </div>
       </footer>
     </main>

@@ -392,9 +392,11 @@ a {
 }
 
 .site-footer__wordmark {
+  display: flex;
+  gap: 0.28em;
   margin: clamp(3.25rem, 5vw, 5rem) 0 clamp(2.5rem, 4vw, 4rem);
   color: var(--paper);
-  font-size: clamp(4.75rem, 13.5vw, 13rem);
+  font-size: clamp(4.25rem, 9vw, 9rem);
   font-weight: 780;
   line-height: 0.72;
   letter-spacing: -0.085em;
@@ -540,7 +542,7 @@ a {
 
   .site-footer__wordmark {
     margin: 4rem 0 3rem;
-    font-size: clamp(3.8rem, 17vw, 5rem);
+    font-size: clamp(3.25rem, 13vw, 4.5rem);
   }
 
   .site-footer__meta {

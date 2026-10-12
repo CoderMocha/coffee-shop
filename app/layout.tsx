@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MORROW Coffee | Before the First Sip",
-  description: "A ten-second study of grind, water and the moment flavor takes shape.",
+  title: "Mocha Coffee | Before the First Sip",
+  description: "Ten seconds where grind, water and time become coffee.",
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png", sizes: "64x64" }],
     shortcut: "/favicon.png",
